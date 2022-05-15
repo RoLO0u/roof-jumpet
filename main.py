@@ -166,7 +166,7 @@ class FallingItems(pygame.sprite.Sprite):
         self.rect.y += self.speed
 
         # Speed update
-        self.speed = score // 20 + 10
+        self.speed = lvl + difficulty
     
     def update(self) -> None:
         """Update classic pygame method"""
@@ -222,7 +222,7 @@ player = pygame.sprite.GroupSingle(Frog())
 # Init list of falling items
 types = ["spike"]
 # Init score
-score = 0
+lvl = 1
 # Init is active
 is_active = False
 # Init font
@@ -231,6 +231,7 @@ pxfont = pygame.font.Font(r"fonts\pixels.TTF", 50)
 bg_music = pygame.mixer.Sound(r"music\music.mp3")
 bg_music.set_volume(0.5)
 bg_music.play(loops=-1)
+difficulty = 5
 
 # How to get sprite:
 # fallingItems.sprites()[n], where n - index of sprite
@@ -255,10 +256,16 @@ while True:
             if event.type == pygame.KEYDOWN:
             
                 # If space pressed
-                if event.key == pygame.K_SPACE:
+                if event.key in (pygame.K_SPACE, pygame.K_1):
+
+                    if event.key == pygame.K_1:
+                        difficulty = 4
+                    else:
+                        difficulty = 9
 
                     # reset score
-                    score = 0
+                    time = 100
+                    lvl = 1
                     player.sprite.stamina = 300
                     # Init group of falling items
                     fallingItems = pygame.sprite.Group(FallingItems(random.choice(types)), FallingItems(random.choice(types)))
@@ -275,7 +282,7 @@ while True:
         fallingItems.update()
 
         # Spawn and delete new items
-        fallingItems, score = spawnItems(fallingItems, types, score)
+        fallingItems, time = spawnItems(fallingItems, types, time)
 
         # Move player
         player.update()
@@ -284,7 +291,12 @@ while True:
         player.draw(screen)
 
         # Draw score in top left
-        display_score(score, (420, 30))
+        display_score(int(time), (420, 30))
+
+        # Draw level
+        display_score(lvl, (310, 30))
+
+        time -= 0.1
 
         # Check collision
         if player.sprite.collideCheck(fallingItems):
@@ -293,6 +305,12 @@ while True:
         # Draw items
         fallingItems.draw(screen)
     
+        if time <= 0:
+
+            lvl += 1
+
+            time = 100
+    
     # If game isn't active
     else:
 
@@ -300,7 +318,7 @@ while True:
         screen.blit(menu, (0, 0))
 
         # Display score in bottom centre
-        display_score(score, (250, 500))
+        display_score(lvl, (250, 500))
 
     # Update screen
     pygame.display.update()
