@@ -37,6 +37,8 @@ class Frog(pygame.sprite.Sprite):
         self.staminalen = 203
         self.staminaratio = self.maxstamina / self.staminalen
 
+        self.resist = False
+
     def move(self, dir: int) -> None:
         """Move player if he has stamina. Positive for right, negative for left"""
 
@@ -48,6 +50,8 @@ class Frog(pygame.sprite.Sprite):
             self.stamina -= 3
             if not self.jumping:
                 self.jumpsound.play()
+        elif self.stamina > -3:
+            self.stamina -= 20
 
     def animate(self) -> None:
         """Edit frame of a player. Animate him"""
@@ -59,13 +63,13 @@ class Frog(pygame.sprite.Sprite):
         """Check if player stands in borders"""
 
         # Check if player is out of right borders
-        if self.rect.x > settings["WIDTH"] + 20:
+        if self.rect.x > settings["WIDTH"] - 20:
             # If yes move player to left side
-            self.rect.x = -40
+            self.rect.x = -10
         # else if player is out of left border
-        elif self.rect.x < -40:
+        elif self.rect.x < -20:
             # Move him to right border
-            self.rect.x = settings["WIDTH"] + 20
+            self.rect.x = settings["WIDTH"] - 20
     
     def barDraw(self) -> None:
         pygame.draw.rect(screen, (255, 50, 0), (22, 29, self.stamina / self.staminaratio, 20))
@@ -76,16 +80,24 @@ class Frog(pygame.sprite.Sprite):
         # Take all presed keys
         keys = pygame.key.get_pressed()
 
+        self.speed = settings["frog_speed"]
+        if keys[pygame.K_SPACE] and (keys[pygame.K_LEFT] or keys[pygame.K_RIGHT]) and not self.resist and self.stamina > 50:
+            self.speed = 40
+            self.stamina -= 50
+            self.resist = True
+        elif not keys[pygame.K_SPACE]:
+            self.resist = False
+
         # Check if left button is pressed
         if keys[pygame.K_LEFT]:
             # Move to left for frog_speed * -1 in settings.json if button left is pressed
-            self.move(-settings["frog_speed"])
+            self.move(-self.speed)
             self.frame = -1 # Change to -1 to edit animation of frog
             self.jumping = True
         # Check if right button is pressed
         elif keys[pygame.K_RIGHT]:
             # Move to left for frog_speed in settings.json if button right is pressed
-            self.move(settings["frog_speed"])
+            self.move(self.speed)
             self.frame = 1 # Change to 1 to edit animation of frog
             self.jumping = True
         # if no buttons pressed chane animation to stand
@@ -145,7 +157,7 @@ class FallingItems(pygame.sprite.Sprite):
         self.image = self.sprites[self.frames]
 
         # Init rect (see in frog class for more) + place in random pos
-        self.rect = self.image.get_rect(bottomleft=(random.randint(20, settings["WIDTH"] - 40), random.randint(-20, 0)))
+        self.rect = self.image.get_rect(bottomleft=(random.randint(0, settings["WIDTH"] - 26), random.randint(-20, 0)))
 
     def move(self) -> None:
         """Move falling item"""
