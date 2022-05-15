@@ -28,6 +28,9 @@ class Frog(pygame.sprite.Sprite):
         # Create model rectangle to use collision and coords methods
         self.rect = self.image.get_rect(midbottom = (200, 500))
 
+        self.jumping = False
+        self.jumpsound = pygame.mixer.Sound(r"music\jump.wav")
+
         # Stamina inits
         self.stamina = 300
         self.maxstamina = 406
@@ -43,6 +46,8 @@ class Frog(pygame.sprite.Sprite):
             # Check if player is out of borders
             self.checkBorders()
             self.stamina -= 3
+            if not self.jumping:
+                self.jumpsound.play()
 
     def animate(self) -> None:
         """Edit frame of a player. Animate him"""
@@ -76,13 +81,16 @@ class Frog(pygame.sprite.Sprite):
             # Move to left for frog_speed * -1 in settings.json if button left is pressed
             self.move(-settings["frog_speed"])
             self.frame = -1 # Change to -1 to edit animation of frog
+            self.jumping = True
         # Check if right button is pressed
         elif keys[pygame.K_RIGHT]:
             # Move to left for frog_speed in settings.json if button right is pressed
             self.move(settings["frog_speed"])
             self.frame = 1 # Change to 1 to edit animation of frog
+            self.jumping = True
         # if no buttons pressed chane animation to stand
         else:
+            self.jumping = False
             self.frame = 0 # Change to 0 to edit animation of frog to stand
 
     def collideCheck(self, sprites: pygame.sprite.Group) -> bool:
@@ -207,6 +215,10 @@ score = 0
 is_active = False
 # Init font
 pxfont = pygame.font.Font(r"fonts\pixels.TTF", 50)
+# Init music
+bg_music = pygame.mixer.Sound(r"music\music.mp3")
+bg_music.set_volume(0.5)
+bg_music.play(loops=-1)
 
 # How to get sprite:
 # fallingItems.sprites()[n], where n - index of sprite
