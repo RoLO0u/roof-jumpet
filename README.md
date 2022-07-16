@@ -1,6 +1,6 @@
 # Roof jumpet
 
-## Game Jam theme ─ Frogs
+## Game Jam theme ─ Frogs, limitation - limited time
 
 ## Using:
 
